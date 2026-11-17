@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head><base href="https://severmahoa.pages.dev/">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>tien truong - Mã hóa file</title>
+<style>
+:root{--bg:#0e1116;--sf:#161b22;--ln:#2a313c;--tx:#e6e9ee;--mu:#8b95a5;--ac:#f2b84b;--acT:#1a1305;--ok:#4cc38a;--bad:#ef7a72}
+@media(prefers-color-scheme:light){:root{--bg:#eef1f5;--sf:#fff;--ln:#d8dee8;--tx:#161b22;--mu:#5d6878;--ac:#b7791f;--acT:#fff;--ok:#17935a;--bad:#c53030}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.skp-ov{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));background:rgba(5,8,12,.82)}
+.skp-ov.on{display:flex}
+.skp{width:100%;max-width:360px;background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:18px;color:var(--tx)}
+.skp h2{margin:0 0 2px;font-size:17px;font-weight:700}
+.skp .sub{margin:0 0 14px;color:var(--mu);font-size:13px}
+.skp input{width:100%;padding:11px 12px;border-radius:9px;border:1px solid var(--ln);background:var(--bg);color:var(--tx);font:600 15px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.04em;outline:none}
+.skp input:focus{border-color:var(--ac)}
+.skp .row{display:flex;gap:8px;margin-top:10px}
+.skp button{flex:1;padding:11px;border-radius:9px;border:1px solid var(--ln);background:transparent;color:var(--tx);font:600 14px inherit;font-family:inherit;cursor:pointer}
+.skp button.p{background:var(--ac);border-color:var(--ac);color:var(--acT)}
+.skp button:disabled{opacity:.55;cursor:default}
+.skp .msg{min-height:20px;margin-top:10px;font-size:13px}
+.skp .msg.bad{color:var(--bad)}.skp .msg.ok{color:var(--ok)}.skp .msg.mu{color:var(--mu)}
+.skp .lnk{display:block;margin-top:12px;text-align:center;color:var(--mu);font-size:12.5px;text-decoration:underline}
+.skp dl{margin:0 0 14px;display:grid;grid-template-columns:auto 1fr;gap:6px 14px}
+.skp dt{color:var(--mu)}.skp dd{margin:0;font-weight:600;text-align:right}
+.skp[data-v="form"] .st,.skp[data-v="st"] .fm{display:none}
+.wrap{max-width:520px;margin:0 auto;padding:22px 16px 60px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.top h1{font-size:18px;margin:0}
+.top .mk{padding:8px 12px;border-radius:9px;border:1px solid var(--ln);background:var(--sf);color:var(--tx);font:600 12.5px inherit;cursor:pointer}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tabs button{flex:1;padding:10px;border-radius:9px;border:1px solid var(--ln);background:var(--sf);color:var(--mu);font:700 13.5px inherit;cursor:pointer}
+.tabs button.on{background:var(--ac);border-color:var(--ac);color:var(--acT)}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:18px}
+.card h3{margin:0 0 4px;font-size:15px}
+.card p.d{margin:0 0 14px;color:var(--mu);font-size:12.5px}
+.fld{margin-bottom:12px}
+.fld label{display:block;margin-bottom:6px;color:var(--mu);font-size:12.5px;font-weight:600}
+.drop{border:1.5px dashed var(--ln);border-radius:10px;padding:16px;text-align:center;cursor:pointer;background:var(--bg)}
+.drop:hover{border-color:var(--ac)}
+.drop .fn{font-size:12.5px;color:var(--tx);word-break:break-all;margin-top:4px}
+.drop .ph{color:var(--mu);font-size:12.5px}
+input[type=file]{display:none}
+input[type=password],input[type=text]{width:100%;padding:11px 12px;border-radius:9px;border:1px solid var(--ln);background:var(--bg);color:var(--tx);font:inherit;outline:none}
+input[type=password]:focus,input[type=text]:focus{border-color:var(--ac)}
+.go{width:100%;margin-top:4px;padding:12px;border-radius:9px;border:none;background:var(--ac);color:var(--acT);font:700 14px inherit;cursor:pointer}
+.go:disabled{opacity:.55;cursor:default}
+.status{min-height:20px;margin-top:10px;font-size:12.5px}
+.status.bad{color:var(--bad)}.status.ok{color:var(--ok)}.status.mu{color:var(--mu)}
+.note{margin-top:18px;color:var(--mu);font-size:11.5px;line-height:1.6;text-align:center}
+.pane{display:none}.pane.on{display:block}
+</style>
+</head>
+<body>
+
+<div id="app" hidden>
+  <div class="wrap">
+    <div class="top">
+      <h1>🔒 tien truong</h1>
+      <button class="mk" onclick="SKPane.open()">Quản lý key</button>
+    </div>
+
+    <div class="tabs">
+      <button id="tbEnc" class="on" onclick="showTab('enc')">Mã hóa file</button>
+      <button id="tbDec" onclick="showTab('dec')">Giải mã file</button>
+    </div>
+
+    <div id="paneEnc" class="pane on">
+      <div class="card">
+        <h3>Mã hóa file</h3>
+        <p class="d">Hỗ trợ mọi loại file (.sh, .json, .js, .ini, .so, .dex, .apk, .zip...). File kết quả không thể giải mã ngược nếu không có đúng mật khẩu.</p>
+        <div class="fld">
+          <label>Chọn file</label>
+          <div class="drop" onclick="encFile.click()">
+            <div class="ph" id="encPh">Bấm để chọn file</div>
+            <div class="fn" id="encFn"></div>
+          </div>
+          <input type="file" id="encFile">
+        </div>
+        <div class="fld">
+          <label>Mật khẩu mã hóa</label>
+          <input type="password" id="encPw" placeholder="Nhập mật khẩu" autocomplete="off">
+        </div>
+        <button class="go" id="encGo">Mã hóa &amp; tải xuống</button>
+        <div class="status" id="encSt"></div>
+      </div>
+    </div>
+
+    <div id="paneDec" class="pane">
+      <div class="card">
+        <h3>Giải mã file</h3>
+        <p class="d">Chọn file .skz đã mã hóa và nhập đúng mật khẩu để khôi phục file gốc.</p>
+        <div class="fld">
+          <label>Chọn file .skz</label>
+          <div class="drop" onclick="decFile.click()">
+            <div class="ph" id="decPh">Bấm để chọn file</div>
+            <div class="fn" id="decFn"></div>
+          </div>
+          <input type="file" id="decFile" accept=".skz">
+        </div>
+        <div class="fld">
+          <label>Mật khẩu giải mã</label>
+          <input type="password" id="decPw" placeholder="Nhập mật khẩu" autocomplete="off">
+        </div>
+        <button class="go" id="decGo">Giải mã &amp; tải xuống</button>
+        <div class="status" id="decSt"></div>
+      </div>
+    </div>
+
+    <div class="note">Mã hóa AES-256-GCM, khóa dẫn xuất bằng PBKDF2 ngay trên trình duyệt — file gốc và mật khẩu không gửi lên bất kỳ server nào.</div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   SKPane: khung xác minh key — OFFLINE
+   Định dạng: 1 ngày = AD-1days-XXXX-XXXX-XXX
+               99999 ngày = TTWVIPP-ADMIN-XXXXX-XXXX
+   ============================================================ */
+(function () {
+  'use strict';
+  var P = 'skp_';
+  var DAY_MS = 24 * 60 * 60 * 1000;
+  var VALID_KEYS = {
+    'TTWVIPP-ADMIN-K7M2P-9X4Q': 99999 * DAY_MS,
+    'AD-1days-K7M2-P9X4-A3B': DAY_MS,
+    'AD-1days-R4N8-T2Y6-C5D': DAY_MS,
+    'AD-1days-L6W9-Z3K7-E8F': DAY_MS,
+    'AD-1days-H2P5-V8M1-G4J': DAY_MS,
+    'AD-1days-B9C3-F6R2-K7L': DAY_MS,
+    'AD-1days-M5X7-J2D9-N3P': DAY_MS,
+    'AD-1days-Q8T4-Y7B5-R6S': DAY_MS,
+    'AD-1days-W3L9-E2H6-U4V': DAY_MS,
+    'AD-1days-Z7A1-I5K8-O9X': DAY_MS,
+    'AD-1days-D4F6-G9L2-C3H': DAY_MS,
+    'AD-1days-S2N8-P4V1-M7Y': DAY_MS,
+    'AD-1days-J6R3-T9X5-K2L': DAY_MS,
+    'AD-1days-C9K1-W7B4-F8N': DAY_MS,
+    'AD-1days-V5M2-D3L9-Q6R': DAY_MS,
+    'AD-1days-N8W6-F2C7-Z1S': DAY_MS,
+    'AD-1days-L3Y9-G5R1-B4T': DAY_MS,
+    'AD-1days-P7B4-M8N2-X6V': DAY_MS,
+    'AD-1days-X2K5-Z4P8-J9W': DAY_MS,
+    'AD-1days-R6M1-V3Y7-E2L': DAY_MS,
+    'AD-1days-B4N9-C8S2-T5K': DAY_MS,
+    'AD-1days-G9R7-K3F6-P1M': DAY_MS,
+    'AD-1days-W1L4-A9D5-Z6Y': DAY_MS,
+    'AD-1days-M7T2-X8B3-R4V': DAY_MS,
+    'AD-1days-V3P8-J6N1-C9L': DAY_MS,
+    'AD-1days-N6Y5-W2K9-F4B': DAY_MS,
+    'AD-1days-L9B3-P7M4-S1X': DAY_MS,
+    'AD-1days-C8V1-R5L7-T3J': DAY_MS,
+    'AD-1days-Z2N7-K4P9-G5M': DAY_MS,
+    'AD-1days-F5X2-Y8C6-B7R': DAY_MS,
+    'AD-1days-Q4K9-M2W5-L8P': DAY_MS,
+    'AD-1days-T7S3-V6R1-J2N': DAY_MS,
+    'AD-1days-J1P8-B5L4-K9W': DAY_MS,
+    'AD-1days-D3R6-N2F7-M8X': DAY_MS,
+    'AD-1days-S8L2-G9Y3-P4B': DAY_MS,
+    'AD-1days-B5M7-K1V8-R6T': DAY_MS,
+    'AD-1days-N2T4-P7C1-X9L': DAY_MS,
+    'AD-1days-X6Y9-F3M5-Z2K': DAY_MS,
+    'AD-1days-W8C1-L4R6-J7V': DAY_MS,
+    'AD-1days-G4P5-V9B2-N1S': DAY_MS,
+    'AD-1days-K9J3-R8W7-M4P': DAY_MS,
+    'AD-1days-Y1F6-T5X2-C8N': DAY_MS,
+    'AD-1days-R3L8-B2P9-K5W': DAY_MS,
+    'AD-1days-M6V2-N7J4-L3Z': DAY_MS,
+    'AD-1days-Z9N5-C1K8-F6B': DAY_MS,
+    'AD-1days-P4W7-X2M3-R9V': DAY_MS,
+    'AD-1days-L2S9-M5B1-Y7T': DAY_MS,
+    'AD-1days-V8B4-K6T2-J3N': DAY_MS,
+    'AD-1days-C7K1-W9P5-G4X': DAY_MS,
+    'AD-1days-F3R5-N8Z7-B2M': DAY_MS,
+    'AD-1days-Q5X8-L2V4-R1K': DAY_MS,
+    'AD-1days-N1M6-P3L9-W7Y': DAY_MS,
+    'AD-1days-B8T2-J5C7-F3R': DAY_MS,
+    'AD-1days-K4Y9-Z6N1-M8V': DAY_MS,
+    'AD-1days-W9P5-G2R8-T4B': DAY_MS,
+    'AD-1days-M2L7-K8V3-C6N': DAY_MS,
+    'AD-1days-R5C1-X4B9-L2P': DAY_MS,
+    'AD-1days-J7B3-F1M5-Z9S': DAY_MS,
+    'AD-1days-T9V6-P2Y8-N4X': DAY_MS,
+    'AD-1days-L1N4-R7K2-W5G': DAY_MS,
+    'AD-1days-G6Z8-M3T1-B7C': DAY_MS,
+    'AD-1days-V4K2-C9L6-J1F': DAY_MS,
+    'AD-1days-X7R5-N1B3-P8M': DAY_MS,
+    'AD-1days-P3B9-W6J4-V2Y': DAY_MS,
+    'AD-1days-F2N7-L5P1-R8K': DAY_MS,
+    'AD-1days-S5L1-K9X6-M3B': DAY_MS,
+    'AD-1days-C1W8-Y2G7-N9V': DAY_MS,
+    'AD-1days-Y8M4-R1F5-K2J': DAY_MS,
+    'AD-1days-N9J2-V7Z3-B5P': DAY_MS,
+    'AD-1days-B2P6-F4R9-X1L': DAY_MS,
+    'AD-1days-K5X3-M8C2-T7V': DAY_MS,
+    'AD-1days-R1T9-P6B8-L3N': DAY_MS,
+    'AD-1days-W7V4-N2X1-G9J': DAY_MS,
+    'AD-1days-Z3K8-J9L5-M6B': DAY_MS,
+    'AD-1days-J6G1-C7N3-V4P': DAY_MS,
+    'AD-1days-M8N5-B3P7-R1X': DAY_MS,
+    'AD-1days-L4Z2-V8K9-W6C': DAY_MS,
+    'AD-1days-T1B7-G5M2-F9Y': DAY_MS,
+    'AD-1days-X9F3-R2J6-P1N': DAY_MS,
+    'AD-1days-P6C9-N4V1-J8K': DAY_MS,
+    'AD-1days-V2M4-K1X8-B7T': DAY_MS,
+    'AD-1days-G7Y1-L9B5-S3R': DAY_MS,
+    'AD-1days-C4L6-T2P9-Z8M': DAY_MS,
+    'AD-1days-N3R2-X7F4-K1V': DAY_MS,
+    'AD-1days-B9V5-M6C1-P7L': DAY_MS,
+    'AD-1days-J2K8-W1N3-R9B': DAY_MS,
+    'AD-1days-F7X1-P4Y9-C5K': DAY_MS,
+    'AD-1days-S1N9-R6T2-M8W': DAY_MS,
+    'AD-1days-K8C3-J5V7-N2G': DAY_MS,
+    'AD-1days-R9M5-X3K1-V4J': DAY_MS,
+    'AD-1days-M3J7-B8L2-T6X': DAY_MS,
+    'AD-1days-W5P1-F9R4-Z3C': DAY_MS,
+    'AD-1days-L7T4-G2M8-K9N': DAY_MS,
+    'AD-1days-P2X9-C6B5-Y1R': DAY_MS,
+    'AD-1days-V6B8-N9K3-M5T': DAY_MS,
+    'AD-1days-Z4N1-J7P2-F8X': DAY_MS,
+    'AD-1days-T8K2-W5V6-B3L': DAY_MS,
+    'AD-1days-G1R6-L4X7-C9J': DAY_MS,
+    'AD-1days-X5L3-Z7T1-R2M': DAY_MS,
+    'AD-1days-C3V7-M2G9-K4B': DAY_MS,
+    'AD-1days-B7F4-P1N8-J6Y': DAY_MS,
+    'AD-1days-N4P8-K3W5-L7S': DAY_MS
+  };
+  var cfg = { app: 'Ứng dụng', deviceId: '', onSuccess: null, onLock: null, recheckMin: 30 };
+  var E = {}, busy = false;
+
+  var ls = {
+    g: function (k) { try { return localStorage.getItem(P + k); } catch (e) { return null; } },
+    s: function (k, v) { try { localStorage.setItem(P + k, v); } catch (e) {} },
+    d: function (k) { try { localStorage.removeItem(P + k); } catch (e) {} }
+  };
+
+  function verify(key, cb) {
+    setTimeout(function () {
+      var k = String(key || '').trim().toUpperCase();
+      if (Object.prototype.hasOwnProperty.call(VALID_KEYS, k)) {
+        var ttl = VALID_KEYS[k];
+        var storedExp = +ls.g('exp') || 0;
+        var storedKey = String(ls.g('key') || '').toUpperCase();
+        var exp;
+        if (storedExp > 0 && storedKey === k) {
+          exp = storedExp;
+        } else {
+          exp = Date.now() + ttl;
+        }
+        cb({ ok: true, tier: 'PRO', exp: exp, max: 0, devices: 1 });
+      } else {
+        cb({ ok: false, msg: 'Key không hợp lệ' });
+      }
+    }, 250);
+  }
+
+  function leftText(exp) {
+    if (!(exp > 0)) return 'Vĩnh viễn';
+    var ms = exp - Date.now();
+    if (ms <= 0) return 'Hết hạn';
+    var d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4);
+    return d > 0 ? 'Còn ' + d + ' ngày ' + h + ' giờ' : 'Còn ' + h + ' giờ ' + m + ' phút';
+  }
+  function info() {
+    return { key: ls.g('key') || '', tier: ls.g('tier') || '', exp: +ls.g('exp') || 0, max: +ls.g('max') || 0, devices: +ls.g('dev') || 0 };
+  }
+  function isUnlocked() {
+    var i = info();
+    return !!i.key && ls.g('ok') === '1' && (i.exp === 0 || i.exp > Date.now());
+  }
+  function save(k, r) {
+    ls.s('key', k); ls.s('tier', String(r.tier || '')); ls.s('exp', String(r.exp > 0 ? r.exp : 0));
+    ls.s('max', String(r.max || 0)); ls.s('dev', String(r.devices || 0)); ls.s('ok', '1');
+  }
+  function wipe() { ['key', 'tier', 'exp', 'max', 'dev', 'ok'].forEach(ls.d); }
+
+  function msg(t, c) { E.msg.textContent = t || ''; E.msg.className = 'msg ' + (c || ''); }
+  function view(v) { E.box.setAttribute('data-v', v); }
+  function paintStatus() {
+    var i = info();
+    E.tier.textContent = i.tier || '—';
+    E.left.textContent = leftText(i.exp);
+    E.dev.textContent = i.max ? i.devices + ' / ' + i.max : '—';
+    E.key.textContent = i.key;
+  }
+
+  function build() {
+    var ov = document.createElement('div');
+    ov.className = 'skp-ov';
+    ov.innerHTML =
+      '<div class="skp" data-v="form" role="dialog" aria-modal="true">' +
+        '<h2></h2>' +
+        '<div class="fm"><p class="sub">Nhập key để tiếp tục</p>' +
+          '<input id="skpIn" type="text" placeholder="NHẬP KEY" autocomplete="off" autocapitalize="characters" spellcheck="false">' +
+          '<div class="row"><button type="button" id="skpPaste">Dán</button><button type="button" class="p" id="skpGo">Kiểm tra</button></div>' +
+          '<div class="msg" id="skpMsg"></div>' +
+          '<a class="lnk" id="skpGet" target="_blank" rel="noopener">Chưa có key? Lấy key tại server</a></div>' +
+        '<div class="st"><p class="sub">Key đã kích hoạt</p>' +
+          '<dl><dt>Key</dt><dd id="skpK" style="font-family:ui-monospace,Menlo,monospace"></dd><dt>Gói</dt><dd id="skpT"></dd><dt>Thời hạn</dt><dd id="skpL"></dd><dt>Thiết bị</dt><dd id="skpD"></dd></dl>' +
+          '<div class="row"><button type="button" id="skpOut">Đổi key</button><button type="button" class="p" id="skpClose">Vào app</button></div></div>' +
+      '</div>';
+    document.body.appendChild(ov);
+    E.ov = ov; E.box = ov.firstChild;
+    E.box.querySelector('h2').textContent = cfg.app;
+    E.in = ov.querySelector('#skpIn'); E.msg = ov.querySelector('#skpMsg');
+    E.tier = ov.querySelector('#skpT'); E.left = ov.querySelector('#skpL'); E.dev = ov.querySelector('#skpD'); E.key = ov.querySelector('#skpK');
+    ov.querySelector('#skpGet').href = 'javascript:void(0)';
+    ov.querySelector('#skpGo').onclick = check;
+    ov.querySelector('#skpPaste').onclick = function () {
+      if (navigator.clipboard && navigator.clipboard.readText)
+        navigator.clipboard.readText().then(function (t) { E.in.value = (t || '').trim(); E.in.focus(); }).catch(function () { msg('Không đọc được clipboard, hãy dán thủ công', 'mu'); });
+    };
+    E.in.onkeydown = function (e) { if (e.key === 'Enter') check(); };
+    ov.querySelector('#skpClose').onclick = close;
+    ov.querySelector('#skpOut').onclick = lock;
+  }
+
+  function check() {
+    if (busy) return;
+    var k = E.in.value.trim();
+    if (!k) return msg('Vui lòng nhập key', 'bad');
+    busy = true; msg('Đang kiểm tra...', 'mu');
+    var go = E.ov.querySelector('#skpGo'); go.disabled = true;
+    verify(k, function (r) {
+      busy = false; go.disabled = false;
+      if (!r.ok) return msg(r.msg || 'Key không hợp lệ', 'bad');
+      save(k, r); paintStatus(); view('st'); msg('');
+      if (cfg.onSuccess) cfg.onSuccess(info());
+    });
+  }
+
+  function open() {
+    if (!E.ov) build();
+    if (isUnlocked()) { paintStatus(); view('st'); } else { view('form'); msg(''); }
+    E.ov.classList.add('on');
+    if (!isUnlocked()) setTimeout(function () { E.in.focus(); }, 50);
+  }
+  function close() { if (isUnlocked() && E.ov) E.ov.classList.remove('on'); }
+  function lock() {
+    wipe(); open();
+    if (E.in) E.in.value = '';
+    if (cfg.onLock) cfg.onLock();
+  }
+
+  function recheck() {
+    if (!isUnlocked()) return;
+    var k = ls.g('key');
+    verify(k, function (r) {
+      if (r.ok) { save(k, r); if (E.ov && E.ov.classList.contains('on')) paintStatus(); return; }
+      lock(); msg(r.msg || 'Key không còn hiệu lực', 'bad');
+    });
+  }
+
+  function init(o) {
+    for (var k in (o || {})) cfg[k] = o[k];
+    if (!E.ov) build();
+    if (isUnlocked()) {
+      if (cfg.onSuccess) cfg.onSuccess(info());
+      setTimeout(recheck, 800);
+    } else {
+      open();
+      if (cfg.onLock) cfg.onLock();
+    }
+    setInterval(function () {
+      if (ls.g('ok') === '1' && !isUnlocked()) lock(); else recheck();
+    }, Math.max(1, cfg.recheckMin) * 60000);
+  }
+
+  window.SKPane = { init: init, open: open, close: close, lock: lock, isUnlocked: isUnlocked, info: info };
+})();
+
+(function () {
+  'use strict';
+
+  var COPYRIGHT_TEXT = 'Ban quyen ma hoa: Sikibidi Mod ZZZ | Web ma hoa: https://severmahoa.pages.dev';
+  var MAGIC = 'SKBZ';
+  var VERSION = 1;
+  var ITERATIONS = 200000;
+
+  function $(id) { return document.getElementById(id); }
+  var enc = new TextEncoder(), dec = new TextDecoder();
+
+  function u32(n) {
+    var b = new Uint8Array(4);
+    new DataView(b.buffer).setUint32(0, n, true);
+    return b;
+  }
+  function readU32(bytes, off) {
+    return new DataView(bytes.buffer, bytes.byteOffset + off, 4).getUint32(0, true);
+  }
+  function u16(n) {
+    var b = new Uint8Array(2);
+    new DataView(b.buffer).setUint16(0, n, true);
+    return b;
+  }
+  function readU16(bytes, off) {
+    return new DataView(bytes.buffer, bytes.byteOffset + off, 2).getUint16(0, true);
+  }
+  function concat(arrs) {
+    var total = 0;
+    arrs.forEach(function (a) { total += a.byteLength; });
+    var out = new Uint8Array(total), p = 0;
+    arrs.forEach(function (a) { out.set(new Uint8Array(a), p); p += a.byteLength; });
+    return out;
+  }
+
+  function deriveKey(password, salt, usage) {
+    return crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey'])
+      .then(function (base) {
+        return crypto.subtle.deriveKey(
+          { name: 'PBKDF2', salt: salt, iterations: ITERATIONS, hash: 'SHA-256' },
+          base,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          [usage]
+        );
+      });
+  }
+
+  function fileToBytes(file) {
+    return file.arrayBuffer().then(function (b) { return new Uint8Array(b); });
+  }
+
+  function encryptFile(file, password) {
+    return fileToBytes(file).then(function (fileBytes) {
+      var nameBytes = enc.encode(file.name);
+      var payload = concat([u16(nameBytes.byteLength), nameBytes, fileBytes]);
+      var salt = crypto.getRandomValues(new Uint8Array(16));
+      var iv = crypto.getRandomValues(new Uint8Array(12));
+      var cTextBytes = enc.encode(COPYRIGHT_TEXT);
+      return deriveKey(password, salt, 'encrypt').then(function (key) {
+        return crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, payload).then(function (cipher) {
+          var header = concat([
+            enc.encode(MAGIC),
+            new Uint8Array([VERSION]),
+            u16(cTextBytes.byteLength), cTextBytes,
+            salt, iv, u32(ITERATIONS)
+          ]);
+          return new Blob([concat([header, new Uint8Array(cipher)])], { type: 'application/octet-stream' });
+        });
+      });
+    });
+  }
+
+  function decryptFile(file, password) {
+    return fileToBytes(file).then(function (bytes) {
+      var magic = dec.decode(bytes.slice(0, 4));
+      if (magic !== MAGIC) throw new Error('File không đúng định dạng .skz');
+      var off = 4;
+      var version = bytes[off]; off += 1;
+      if (version !== VERSION) throw new Error('Phiên bản file không được hỗ trợ');
+      var ctLen = readU16(bytes, off); off += 2;
+      off += ctLen;
+      var salt = bytes.slice(off, off + 16); off += 16;
+      var iv = bytes.slice(off, off + 12); off += 12;
+      off += 4;
+      var cipher = bytes.slice(off);
+      return deriveKey(password, salt, 'decrypt').then(function (key) {
+        return crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, cipher).then(function (plainBuf) {
+          var plain = new Uint8Array(plainBuf);
+          var nameLen = readU16(plain, 0);
+          var name = dec.decode(plain.slice(2, 2 + nameLen));
+          var content = plain.slice(2 + nameLen);
+          return { name: name, blob: new Blob([content]) };
+        }).catch(function () {
+          throw new Error('Sai mật khẩu hoặc file đã bị hỏng');
+        });
+      });
+    });
+  }
+
+  function download(blob, name) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+  }
+
+  function setStatus(id, text, cls) {
+    var e = $(id); e.textContent = text || ''; e.className = 'status ' + (cls || '');
+  }
+
+  window.showTab = function (t) {
+    $('tbEnc').classList.toggle('on', t === 'enc');
+    $('tbDec').classList.toggle('on', t === 'dec');
+    $('paneEnc').classList.toggle('on', t === 'enc');
+    $('paneDec').classList.toggle('on', t === 'dec');
+  };
+
+  $('encFile').onchange = function () {
+    var f = this.files[0];
+    $('encPh').style.display = f ? 'none' : '';
+    $('encFn').textContent = f ? f.name : '';
+  };
+  $('decFile').onchange = function () {
+    var f = this.files[0];
+    $('decPh').style.display = f ? 'none' : '';
+    $('decFn').textContent = f ? f.name : '';
+  };
+
+  $('encGo').onclick = function () {
+    var f = $('encFile').files[0], pw = $('encPw').value;
+    if (!f) return setStatus('encSt', 'Hãy chọn file cần mã hóa', 'bad');
+    if (!pw) return setStatus('encSt', 'Hãy nhập mật khẩu mã hóa', 'bad');
+    $('encGo').disabled = true; setStatus('encSt', 'Đang mã hóa...', 'mu');
+    encryptFile(f, pw).then(function (blob) {
+      download(blob, f.name + '.skz');
+      setStatus('encSt', 'Đã mã hóa và tải xuống: ' + f.name + '.skz', 'ok');
+    }).catch(function (e) {
+      setStatus('encSt', 'Lỗi: ' + e.message, 'bad');
+    }).finally(function () { $('encGo').disabled = false; });
+  };
+
+  $('decGo').onclick = function () {
+    var f = $('decFile').files[0], pw = $('decPw').value;
+    if (!f) return setStatus('decSt', 'Hãy chọn file .skz', 'bad');
+    if (!pw) return setStatus('decSt', 'Hãy nhập mật khẩu giải mã', 'bad');
+    $('decGo').disabled = true; setStatus('decSt', 'Đang giải mã...', 'mu');
+    decryptFile(f, pw).then(function (r) {
+      download(r.blob, r.name);
+      setStatus('decSt', 'Đã giải mã và tải xuống: ' + r.name, 'ok');
+    }).catch(function (e) {
+      setStatus('decSt', 'Lỗi: ' + e.message, 'bad');
+    }).finally(function () { $('decGo').disabled = false; });
+  };
+})();
+
+SKPane.init({
+  app: 'tien truong',
+  onSuccess: function () { document.getElementById('app').hidden = false; },
+  onLock: function () { document.getElementById('app').hidden = true; }
+});
+</script>
+</body>
+</html>
